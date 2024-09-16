@@ -113,6 +113,11 @@ function connect_scene_events!(screen::Screen, scene::Scene, comm::Observable)
                 resize!(scene, tuple(resize...))
             end
         catch err
+            if err isa ErrorException
+                # Hack to ignore annoying but benign error warnings...
+                startswith(err.msg, "All non scalars need same length") && return
+                startswith(err.msg, "Invalid text boundingbox") && return
+            end
             @warn "Error in window event callback" exception=(err, Base.catch_backtrace())
         end
         return
