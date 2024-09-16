@@ -201,6 +201,9 @@ function process_interaction(r::RectangleZoom, event::KeysEvent, ax::Axis)
     r.active[] || return Consume(false)
 
     r.rectnode[] = _chosen_limits(r, ax)
+    if r.modifier ∉ event.keys
+        r.active[] = false # deactivate if modifier was released before the mouse
+    end
     return Consume(true)
 end
 
@@ -213,15 +216,13 @@ end
 
 function process_interaction(::LimitReset, event::MouseEvent, ax::Axis)
 
-    if event.type === MouseEventTypes.leftclick
-        if ispressed(ax.scene, Keyboard.left_control)
-            if ispressed(ax.scene, Keyboard.left_shift)
-                autolimits!(ax)
-            else
-                reset_limits!(ax)
-            end
-            return Consume(true)
+    if event.type === MouseEventTypes.rightdoubleclick
+        if ispressed(ax.scene, Keyboard.left_super)
+            autolimits!(ax)
+        else
+            reset_limits!(ax)
         end
+        return Consume(true)
     end
 
     return Consume(false)
